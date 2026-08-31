@@ -1,103 +1,115 @@
 # Interactive STEM Learning Platform
 
-> Open-source platform to learn STEM in the most interactive way possible — browser-based simulations, executable notebooks, adaptive AI tutoring, and beautiful visualizations. Built to serve real users *today* with a fully open-source stack.
+> Open-source platform to learn STEM in the most interactive way possible — browser-based Python (Pyodide), simulations, KaTeX math, and self-hosted AI tutoring. Built to serve real users *today* with a fully open-source stack.
 
-**Notion Hub**: [Interactive STEM Learning Platform – Launch Stack & Roadmap](https://app.notion.com/p/3cd6669e49aa81cb81e2c82bd68ad999)
+**Notion Hub (single source of truth)**: [Interactive STEM Learning Platform – Launch Stack & Roadmap](https://app.notion.com/p/3cd6669e49aa81cb81e2c82bd68ad999)
 
-## Why this stack?
+**Status (as of latest commit)**: Functional starter scaffold is in place. You can clone, install, and run the Next.js app. A working browser-based Python lesson is included. Auth, database schema, security headers, CI, and Docker Compose are ready for the next implementation steps.
 
-- **Serve users immediately**: Docker Compose + Next.js gets a polished experience running on a single VPS in hours.
-- **Maximum interactivity, minimum cost**: Pyodide (Python in the browser), React Three Fiber, KaTeX, and client-side visualizations keep the backend light.
-- **100% open source**: No proprietary clouds or models required. Self-host everything.
-- **Future-proof**: Easy path from MVP → production-scale (Kubernetes, advanced AI, real-time collaboration).
+## Verified Stack (Official Sources Only)
 
-## Recommended Stack (MVP → Production)
+| Layer | Technology | Official Docs |
+|-------|------------|---------------|
+| Framework | Next.js 15+ (App Router) | https://nextjs.org/docs |
+| Auth | Auth.js (NextAuth v5) | https://authjs.dev |
+| UI | Tailwind CSS + shadcn/ui patterns | https://ui.shadcn.com |
+| Math | KaTeX | https://katex.org |
+| Browser Python | Pyodide | https://pyodide.org |
+| Database | PostgreSQL 16 + pgvector | https://github.com/pgvector/pgvector |
+| AI Inference | Ollama | https://docs.ollama.com |
+| Deployment | Docker Compose + standalone output | Next.js self-hosting guide |
 
-### Frontend
-- **Next.js 15** (App Router) – React, SSR/SSG, Server Actions
-- **Tailwind CSS + shadcn/ui + Radix UI** – modern, accessible design system
-- **KaTeX** – fast math rendering
-- **Pyodide + JupyterLite / custom notebook runner** – full scientific Python in the browser
-- **React Three Fiber + Three.js** – selective 3D/physics simulations
-- **TanStack Query + Zustand** – data & state
-- **PWA support** – offline lessons
+## Quick Start (Local Development)
 
-### Backend (start simple)
-- Next.js Route Handlers / Server Actions (zero extra services at first)
-- **PostgreSQL 16 + pgvector** – users, progress, content, embeddings
-- Optional later: **FastAPI** for heavy STEM/AI workloads
-- **Redis** (optional) – cache, sessions, realtime
-- **MinIO** – S3-compatible object storage
-
-### AI Tutor (self-hosted)
-- **Ollama** (easiest local/remote inference)
-- Open models: Llama 3.1/3.2, Phi-4, Qwen2.5, Gemma 2, etc.
-- Simple RAG with pgvector or LlamaIndex
-
-### DevOps
-- **Docker Compose** – local + single-server production
-- **Coolify / CapRover / Dokku** – low-ops deployment on any VPS
-- GitHub Actions for CI
-- Caddy or Traefik for automatic HTTPS
-
-## Quick Start (Local)
+Requirements (official):
+- Node.js ≥ 20.9
+- Docker (optional but recommended for Postgres)
 
 ```bash
 git clone https://github.com/hkra1/interactive-stem-platform.git
 cd interactive-stem-platform
-cp .env.example .env          # edit if needed
-docker compose up --build
+cp .env.example .env
+# Generate a secret: npx auth secret   (or openssl rand -base64 32)
+npm install
+npm run dev
 ```
 
 Open http://localhost:3000
 
-## Project Structure (target)
+- Landing page and navigation work
+- `/learn` lists modules
+- `/learn/intro-python` contains a **live Pyodide Python runner** (official CDN pattern)
+
+For full stack (with Postgres):
+```bash
+docker compose up -d db
+# Then apply schema: psql $DATABASE_URL -f db/schema.sql
+npm run dev
+```
+
+## What Is Already Implemented
+
+- Next.js App Router layout, landing page, learn index
+- Working interactive Python lesson (`/learn/intro-python`) using official Pyodide
+- Auth.js v5 configuration + route handler (providers ready to enable)
+- Security headers (CSP, X-Frame-Options, etc.) in `next.config.ts`
+- PostgreSQL + pgvector schema (`db/schema.sql`)
+- Docker Compose for web + Postgres
+- GitHub Actions CI (lint + typecheck)
+- Security documentation (`docs/SECURITY.md`)
+- Architecture overview (`docs/ARCHITECTURE.md`)
+
+## Project Structure (Current)
 
 ```
 .
-├── apps/web/                 # Next.js application
-├── packages/                 # Shared UI, configs, content utilities
-├── content/                  # MDX lessons + notebooks (Git-friendly)
-├── docker/                   # Dockerfiles & compose overrides
-├── services/                 # Optional FastAPI workers (future)
-├── docs/                     # Architecture, contribution guides
-└── .github/workflows/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── globals.css
+│   ├── learn/
+│   │   ├── page.tsx
+│   │   └── intro-python/page.tsx   # Live Pyodide demo
+│   └── api/auth/[...nextauth]/
+├── auth.ts                 # Auth.js config
+├── db/schema.sql           # Postgres + pgvector
+├── docker/
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── SECURITY.md
+├── content/                # Future MDX / notebooks
+├── next.config.ts          # Security headers + standalone
+├── package.json
+├── tailwind.config.ts
+└── .github/workflows/ci.yml
 ```
 
-## MVP Scope (Ship This First)
+## Security Highlights
 
-- Structured courses with MDX + interactive Python cells
-- Progress tracking & user accounts
-- Beautiful math + live plots
-- Basic self-hosted AI tutor ("explain", "practice problem", "help with code")
-- Mobile-responsive + installable PWA
-- Admin-friendly content (Markdown/MDX in Git or simple CMS)
+See `docs/SECURITY.md` for full details. Key points from official guidance:
+- Security headers enabled by default
+- Secrets never committed (use `.env`)
+- Auth.js secret generation via official CLI
+- Database schema prepared for least-privilege usage
+- Pyodide runs client-side only (browser sandbox)
 
-## Roadmap
+## Next Implementation Steps (for contributors / maintainers)
 
-| Phase | Focus | Timeline goal |
-|-------|-------|---------------|
-| 0 | Working demo with 3–5 interactive modules + auth + basic AI | Days |
-| 1 | Content authoring UX, better RAG, Redis, polish | 2–4 weeks |
-| 2 | Real-time features (Yjs), richer sims, FastAPI extraction | 1–2 months |
-| 3 | k3s/Kubernetes, multi-tenancy, open contribution of modules | Ongoing |
+1. Enable at least one Auth provider (GitHub recommended) and wire the Postgres adapter.
+2. Add more interactive modules under `app/learn/` or migrate to MDX + content layer.
+3. Implement AI tutor page that calls Ollama (`/api/chat` → Ollama `/api/chat`).
+4. Add progress tracking using the `user_progress` table.
+5. Tighten CSP after testing all CDNs.
+6. Production deploy via Coolify / Docker + Caddy on a VPS.
 
 ## Contributing
 
-We welcome educators, developers, and scientists!
-
-1. Fork the repo
-2. Add content under `content/` or improve the platform
-3. Open a Pull Request
-
-See `docs/CONTRIBUTING.md` (coming soon) for guidelines.
+Educators and developers are welcome. Open issues or PRs. Prefer content contributions that follow the interactive, browser-first philosophy.
 
 ## License
 
-MIT (recommended) – free for education, research, and commercial use.
+MIT
 
 ---
 
-**Built for the common audience.** Let's make high-quality interactive STEM education accessible to everyone.
-
-Questions? Open an issue or check the [Notion document](https://app.notion.com/p/3cd6669e49aa81cb81e2c82bd68ad999).
+Built for the common audience. High-quality interactive STEM education should be free and open.
