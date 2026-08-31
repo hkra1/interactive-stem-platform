@@ -1,19 +1,23 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 // import { PostgresAdapter } from "@auth/pg-adapter";
 // import { Pool } from "pg";
 
-// Optional: enable database sessions later
+// Optional: enable after DATABASE_URL is configured
 // const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // adapter: PostgresAdapter(pool),
   providers: [
-    // Enable GitHub (or others) by setting AUTH_GITHUB_ID and AUTH_GITHUB_SECRET
-    // GitHub({
-    //   clientId: process.env.AUTH_GITHUB_ID,
-    //   clientSecret: process.env.AUTH_GITHUB_SECRET,
-    // }),
+    GitHub({
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+    }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
   ],
   pages: {
     signIn: "/auth/signin",
@@ -24,10 +28,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const isOnProtected = nextUrl.pathname.startsWith("/dashboard");
       if (isOnProtected) {
         if (isLoggedIn) return true;
-        return false; // Redirect to login
+        return false;
       }
       return true;
     },
   },
-  // trustHost: true, // useful behind reverse proxies
 });
